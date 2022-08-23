@@ -15,5 +15,11 @@ namespace Api
         {
             return await _context.Houses.Select(x => new HouseDto(x.Id, x.Address, x.Country, x.Price)).ToListAsync();
         }
+
+        public async Task<HouseDetailDto?> Get(int id)
+        {
+            var house = await _context.Houses.SingleOrDefaultAsync(x => x.Id == id);
+            return house is not null ? new HouseDetailDto(house.Id, house.Address, house.Country, house.Description, house.Price, house.Photo) : null;
+        }
     }
 }
