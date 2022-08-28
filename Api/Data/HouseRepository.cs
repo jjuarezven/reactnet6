@@ -6,9 +6,9 @@ namespace Api
     {
         private readonly HouseDbContext _context;
 
-        public HouseRepository(HouseDbContext context)
+        public HouseRepository(HouseDbContext _context)
         {
-            _context = context;
+            _context = _context;
         }
 
         public async Task<IEnumerable<HouseDto>> GetAll()
@@ -20,6 +20,49 @@ namespace Api
         {
             var house = await _context.Houses.SingleOrDefaultAsync(x => x.Id == id);
             return house is not null ? new HouseDetailDto(house.Id, house.Address, house.Country, house.Description, house.Price, house.Photo) : null;
+        }
+
+        public async Task<HouseDetailDto> Add(HouseDetailDto dto)
+        {
+            var entity = new HouseEntity();
+            DtoToEntity(dto, entity);
+            _context.Houses.Add(entity);
+            await _context.SaveChangesAsync();
+            return EntityToDetailDto(entity);
+        }
+
+        public async Task<HouseDetailDto> Update(HouseDetailDto dto)
+        {
+            var entity = await _context.Houses.FindAsync(dto.Id);
+            if (entity == null)
+                throw new ArgumentException($"Trying to update house: entity with ID {dto.Id} not found.");
+            DtoToEntity(dto, entity);
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return EntityToDetailDto(entity);
+        }
+
+        public async Task Delete(int id)
+        {
+            var entity = await _context.Houses.FindAsync(id);
+            if (entity == null)
+                throw new ArgumentException($"Trying to delete house: entity with ID {id} not found.");
+            _context.Houses.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        private static HouseDetailDto EntityToDetailDto(HouseEntity e)
+        {
+            return new HouseDetailDto(e.Id, e.Address, e.Country, e.Description, e.Price, e.Photo);
+        }
+
+        private static void DtoToEntity(HouseDetailDto dto, HouseEntity e)
+        {
+            e.Address = dto.Address;
+            e.Country = dto.Country;
+            e.Description = dto.Description;
+            e.Price = dto.Price;
+            e.Photo = dto.Photo;
         }
     }
 }
