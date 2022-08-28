@@ -6,9 +6,9 @@ namespace Api
     {
         private readonly HouseDbContext _context;
 
-        public HouseRepository(HouseDbContext _context)
+        public HouseRepository(HouseDbContext context)
         {
-            _context = _context;
+            _context = context;
         }
 
         public async Task<IEnumerable<HouseDto>> GetAll()

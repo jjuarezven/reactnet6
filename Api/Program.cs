@@ -58,7 +58,7 @@ app.MapPut("/houses", async ([FromBody] HouseDetailDto dto, IHouseRepository rep
     return Results.Ok(updatedHouse);
 }).ProducesProblem(StatusCodes.Status404NotFound).Produces<HouseDetailDto>(StatusCodes.Status200OK);
 
-app.MapDelete("/houses", async (int houseId, IHouseRepository repo) =>
+app.MapDelete("/houses/{houseId:int}", async (int houseId, IHouseRepository repo) =>
 {
     if (await repo.Get(houseId) is null)
     {

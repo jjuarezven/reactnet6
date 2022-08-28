@@ -31,6 +31,21 @@ export const useAddHouse = () => {
 	);
 };
 
+export const useUpdateHouse = () => {
+	const nav = useNavigate();
+	const queryClient = useQueryClient();
+
+	return useMutation<AxiosResponse, AxiosError, House>(
+		(h) => axios.put(`${Config.baseApiUrl}/houses/`, h),
+		{
+			onSuccess: (_, house) => {
+				queryClient.invalidateQueries("houses");
+				nav(`/house/${house.id}`);
+			},
+		}
+	);
+};
+
 export const useDeleteHouse = () => {
 	const nav = useNavigate();
 	const queryClient = useQueryClient();
@@ -38,9 +53,9 @@ export const useDeleteHouse = () => {
 	return useMutation<AxiosResponse, AxiosError, House>(
 		(h) => axios.delete(`${Config.baseApiUrl}/houses/${h.id}`),
 		{
-			onSuccess: (_, house) => {
+			onSuccess: () => {
 				queryClient.invalidateQueries("houses");
-				nav(`/house/${house.id}`);
+				nav("/");
 			},
 		}
 	);
