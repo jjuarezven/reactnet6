@@ -1,5 +1,6 @@
 using Api;
 using Microsoft.AspNetCore.Mvc;
+using MiniValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,21 +43,29 @@ app.MapGet("/houses/{houseId:int}", async (int houseId, IHouseRepository repo) =
     return Results.Ok(house);
 }).ProducesProblem(StatusCodes.Status404NotFound).Produces<HouseDetailDto>(StatusCodes.Status200OK);
 
-app.MapPost("/houses", async([FromBody]HouseDetailDto dto, IHouseRepository repo) =>
+app.MapPost("/houses", async ([FromBody] HouseDetailDto dto, IHouseRepository repo) =>
 {
+    if (!MiniValidator.TryValidate(dto, out var errors))
+    {
+        return Results.ValidationProblem(errors);
+    }
     var newHouse = await repo.Add(dto);
     return Results.Created($"/house/{newHouse.Id}", newHouse);
-}).Produces<HouseDetailDto>(StatusCodes.Status201Created);
+}).Produces<HouseDetailDto>(StatusCodes.Status201Created).ProducesValidationProblem();
 
 app.MapPut("/houses", async ([FromBody] HouseDetailDto dto, IHouseRepository repo) =>
 {
+    if (!MiniValidator.TryValidate(dto, out var errors))
+    {
+        return Results.ValidationProblem(errors);
+    }
     if (await repo.Get(dto.Id) is null)
     {
-        return Results.Problem($"House {dto.Id} not found", statusCode: StatusCodes.Status404NotFound);        
+        return Results.Problem($"House {dto.Id} not found", statusCode: StatusCodes.Status404NotFound);
     }
     var updatedHouse = await repo.Update(dto);
     return Results.Ok(updatedHouse);
-}).ProducesProblem(StatusCodes.Status404NotFound).Produces<HouseDetailDto>(StatusCodes.Status200OK);
+}).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem().Produces<HouseDetailDto>(StatusCodes.Status200OK);
 
 app.MapDelete("/houses/{houseId:int}", async (int houseId, IHouseRepository repo) =>
 {
