@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { toBase64 } from "../common/toBase64";
 import { House } from "../models/House";
 
 type Args = {
@@ -12,6 +13,17 @@ export const HouseForm = ({ house, submitted }: Args) => {
 	const onSubmit: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
 		e.preventDefault();
 		submitted(houseState);
+	};
+	const onFileSelected = async (
+		e: React.ChangeEvent<HTMLInputElement>
+	): Promise<void> => {
+		e.preventDefault();
+		e.target.files &&
+			e.target.files[0] &&
+			setHouseState({
+				...houseState,
+				photo: await toBase64(e.target.files[0]),
+			});
 	};
 
 	return (
@@ -73,6 +85,15 @@ export const HouseForm = ({ house, submitted }: Args) => {
 							price: parseInt(e.target.value),
 						})
 					}
+				/>
+			</div>
+			<div className="form-group mt-2">
+				<label htmlFor="image">Image</label>
+				<input
+					id="image"
+					type="file"
+					className="form-control"
+					onChange={onFileSelected}
 				/>
 			</div>
 			<button
