@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { ApiStatus } from "../ApiStatus";
+import { Bids } from "../bids/Bids";
 import { currencyFormatter } from "../config";
 import { useDeleteHouse, useFetchHouse } from "../hooks/houseHooks";
 import defaultImage from "./DefaultPhoto";
@@ -69,6 +70,7 @@ export const HouseDetail = () => {
 				<div className="row">
 					<div className="col-12 mt-3">{data.description}</div>
 				</div>
+				<Bids house={data} />
 			</div>
 		</div>
 	);
