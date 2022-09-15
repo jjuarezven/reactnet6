@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MiniValidation;
 
 namespace Api
@@ -7,12 +8,12 @@ namespace Api
     {
         public static void MapHouseEndpoints(this WebApplication app)
         {
-            app.MapGet("/houses", (IHouseRepository repo) =>
+            app.MapGet("/houses", [Authorize] (IHouseRepository repo) =>
             {
                 return repo.GetAll();
             }).Produces<HouseDetailDto>(StatusCodes.Status200OK);
 
-            app.MapGet("/houses/{houseId:int}", async (int houseId, IHouseRepository repo) =>
+            app.MapGet("/houses/{houseId:int}", [Authorize] async (int houseId, IHouseRepository repo) =>
             {
                 var house = await repo.Get(houseId);
                 if (house is null)
@@ -22,7 +23,7 @@ namespace Api
                 return Results.Ok(house);
             }).ProducesProblem(StatusCodes.Status404NotFound).Produces<HouseDetailDto>(StatusCodes.Status200OK);
 
-            app.MapPost("/houses", async ([FromBody] HouseDetailDto dto, IHouseRepository repo) =>
+            app.MapPost("/houses", [Authorize("admin")] async ([FromBody] HouseDetailDto dto, IHouseRepository repo) =>
             {
                 if (!MiniValidator.TryValidate(dto, out var errors))
                 {
@@ -32,7 +33,7 @@ namespace Api
                 return Results.Created($"/house/{newHouse.Id}", newHouse);
             }).Produces<HouseDetailDto>(StatusCodes.Status201Created).ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
-            app.MapPut("/houses", async ([FromBody] HouseDetailDto dto, IHouseRepository repo) =>
+            app.MapPut("/houses", [Authorize] async ([FromBody] HouseDetailDto dto, IHouseRepository repo) =>
             {
                 if (!MiniValidator.TryValidate(dto, out var errors))
                 {
@@ -46,7 +47,7 @@ namespace Api
                 return Results.Ok(updatedHouse);
             }).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem().Produces<HouseDetailDto>(StatusCodes.Status200OK);
 
-            app.MapDelete("/houses/{houseId:int}", async (int houseId, IHouseRepository repo) =>
+            app.MapDelete("/houses/{houseId:int}", [Authorize] async (int houseId, IHouseRepository repo) =>
             {
                 if (await repo.Get(houseId) is null)
                 {

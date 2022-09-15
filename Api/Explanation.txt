@@ -1,0 +1,4 @@
+﻿This branch is for implementing security by using cookies.
+To run it properly, first execute the publish.ps1 to get a production build from the react project, those files are copied 
+to the wwwroot/static directory inside the API project which has the changes on Program.cs to generate a valid cookie.  
+After that, run the API project and in the login page enter "roland" and "secret" to get logged in.
